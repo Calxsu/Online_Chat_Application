@@ -1,0 +1,25 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+#messages {
+    background-color: #f8f9fa;
+}
+
+.message {
+    margin-bottom: 10px;
+}
+
+.message-own {
+    text-align: right;
+    color: blue;
+}
+
+.message-deleted {
+    color: gray;
+    font-style: italic;
+}
+
+.attachment {
+    max-width: 200px;
+}
