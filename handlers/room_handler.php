@@ -1,11 +1,8 @@
 <?php
-declare(strict_types=1);
-
 session_start();
+require_once '../classes/Database.php';
 require_once '../classes/Room.php';
 require_once '../classes/User.php';
-
-header('Content-Type: application/json');
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['error' => 'Unauthorized']);
@@ -30,6 +27,7 @@ if (isset($_GET['action'])) {
         // Get all rooms available to user
         $response = $room->getByUser((int)$_SESSION['user_id']);
     }
+    
     echo json_encode($response);
     exit;
 }
@@ -38,7 +36,23 @@ if (isset($_GET['action'])) {
 $data = $_POST;
 if (isset($data['action'])) {
     if ($data['action'] === 'create' && isset($data['name'], $data['visibility'])) {
-        $response = $room->create($data['name'], (int)$_SESSION['user_id'], $data['visibility']);
+        // FIXED: Ensure proper response format
+        $result = $room->create($data['name'], (int)$_SESSION['user_id'], $data['visibility']);
+        
+        if (isset($result['success']) && $result['success']) {
+            // FIXED: Make sure response includes all necessary data
+            $response = [
+                'success' => true,
+                'room_id' => (int)$result['room_id'],
+                'message' => 'Room created successfully'
+            ];
+        } else {
+            $response = [
+                'success' => false,
+                'error' => $result['error'] ?? 'Failed to create room'
+            ];
+        }
+        
     } elseif ($data['action'] === 'invite' && isset($data['room_id'], $data['username'])) {
         if (!$room->isRoomCreator((int)$data['room_id'], (int)$_SESSION['user_id'])) {
             $response = ['error' => 'Only room creator can invite users'];
@@ -48,7 +62,7 @@ if (isset($data['action'])) {
                 $response = ['error' => 'User not found'];
             } else {
                 $response = $room->inviteUser((int)$data['room_id'], (int)$_SESSION['user_id'], $inviteeId);
-                if ($response['success']) {
+                if (isset($response['success']) && $response['success']) {
                     $response['invited_user_id'] = $inviteeId;
                 }
             }
@@ -60,7 +74,12 @@ if (isset($data['action'])) {
         // Optional server-side leave tracking
         // For now, we'll just return success since we're handling it client-side
         $response = ['success' => true, 'message' => 'Left room successfully'];
+    } else {
+        $response = ['error' => 'Invalid action or missing parameters'];
     }
+} else {
+    $response = ['error' => 'No action specified'];
 }
 
 echo json_encode($response);
+?>
