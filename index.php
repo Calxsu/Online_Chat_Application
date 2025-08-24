@@ -72,11 +72,6 @@ if (isset($_GET['error'])) {
             --chat-bg: var(--gray-50);
         }
 
-        /* Remove emoticon icons (lucide) visually while keeping markup intact */
-        i[data-lucide] {
-            display: none !important;
-        }
-
         /* Dark theme variables */
         [data-theme="dark"] {
             --gray-900: #f9fafb;
@@ -129,7 +124,7 @@ if (isset($_GET['error'])) {
             height: calc(100vh - 80px);
         }
 
-        /* ===== TOAST NOTIFICATION STYLES ===== */
+        /* ===== ENHANCED TOAST NOTIFICATION STYLES ===== */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -137,21 +132,26 @@ if (isset($_GET['error'])) {
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.75rem;
             pointer-events: none;
         }
 
         .toast {
             pointer-events: auto;
             background: var(--white);
-            border: 1px solid var(--gray-200);
-            border-radius: 8px;
-            padding: 1rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08);
-            max-width: 350px;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            max-width: 420px;
+            min-width: 300px;
             opacity: 0;
-            transform: translateX(12px);
-            transition: all 0.28s cubic-bezier(.2, .9, .3, 1);
+            transform: translateX(20px);
+            transition: all 0.3s cubic-bezier(.2, .9, .3, 1);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
         }
 
         .toast.show {
@@ -159,20 +159,95 @@ if (isset($_GET['error'])) {
             transform: translateX(0);
         }
 
-        .toast.success {
-            border-left: 4px solid var(--success);
+        .toast::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
         }
 
-        .toast.error {
-            border-left: 4px solid var(--error);
+        .toast.success::before {
+            background: var(--success);
         }
 
-        .toast.warning {
-            border-left: 4px solid var(--warning);
+        .toast.error::before {
+            background: var(--error);
         }
 
-        .toast.info {
-            border-left: 4px solid var(--accent);
+        .toast.warning::before {
+            background: var(--warning);
+        }
+
+        .toast.info::before {
+            background: var(--accent);
+        }
+
+        .toast-icon {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast.success .toast-icon {
+            color: var(--success);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--error);
+        }
+
+        .toast.warning .toast-icon {
+            color: var(--warning);
+        }
+
+        .toast.info .toast-icon {
+            color: var(--accent);
+        }
+
+        .toast-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--gray-900);
+            line-height: 1.3;
+        }
+
+        .toast-message {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            color: var(--gray-400);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-close:hover {
+            background: var(--gray-100);
+            color: var(--gray-600);
         }
 
         /* ===== MODAL STYLES ===== */
@@ -654,7 +729,7 @@ if (isset($_GET['error'])) {
             min-width: 26px;
             padding: 0;
         }
-        
+
         .sidebar-room-btn--invite {
             background: var(--accent);
             color: #fff;
@@ -834,6 +909,7 @@ if (isset($_GET['error'])) {
         }
 
         @keyframes pulse {
+
             0%,
             100% {
                 opacity: 1;
@@ -848,12 +924,13 @@ if (isset($_GET['error'])) {
             from {
                 transform: rotate(0deg);
             }
+
             to {
                 transform: rotate(360deg);
             }
         }
 
-        .chat-header-actions {
+        /* .chat-header-actions {
             display: flex;
             gap: 0.5rem;
             align-items: center;
@@ -871,7 +948,7 @@ if (isset($_GET['error'])) {
             display: flex;
             align-items: center;
             justify-content: center;
-        }
+        } */
 
         .chat-messages-area {
             flex: 1;
@@ -1802,14 +1879,7 @@ if (isset($_GET['error'])) {
                                 </button>
                                 <span id="chat-room-name" style="font-size:0.95rem;">Room Name</span>
                             </div>
-                            <div class="chat-header-actions">
-                                <button class="chat-header-btn" title="Room Members">
-                                    <i data-lucide="users" style="width: 1.125rem; height: 1.125rem;"></i>
-                                </button>
-                                <button class="chat-header-btn" title="Report Room">
-                                    <i data-lucide="flag" style="width: 1.125rem; height: 1.125rem;"></i>
-                                </button>
-                            </div>
+                            <!-- Removed chat-header-actions div with the two buttons -->
                         </div>
 
                         <div id="chat-messages" class="chat-messages-area">
@@ -1893,34 +1963,48 @@ if (isset($_GET['error'])) {
         let isSending = false;
         let allRooms = [];
 
-        // Toast notification function
+        // Enhanced Toast notification function
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
+
+            // Split message into title and content
+            const messages = message.split('. ');
+            const title = messages[0];
+            const content = messages.slice(1).join('. ');
+
             toast.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <i data-lucide="${getToastIcon(type)}" style="width: 18px; height: 18px;"></i>
-                    <span>${message}</span>
+                <div class="toast-icon">
+                    <i data-lucide="${getToastIcon(type)}" style="width: 20px; height: 20px;"></i>
                 </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    ${content ? `<div class="toast-message">${content}</div>` : ''}
+                </div>
+                <button class="toast-close" onclick="this.parentElement.classList.remove('show'); setTimeout(() => this.parentElement.remove(), 300);">
+                    <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+                </button>
             `;
-            
+
             container.appendChild(toast);
-            
+
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
-            
+
             setTimeout(() => {
                 toast.classList.add('show');
             }, 10);
-            
+
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => {
-                    container.removeChild(toast);
+                    if (container.contains(toast)) {
+                        container.removeChild(toast);
+                    }
                 }, 300);
-            }, 3000);
+            }, 5000);
         }
 
         // JS MODULE: auth_form
@@ -2051,7 +2135,7 @@ if (isset($_GET['error'])) {
                     const isBanned = room.is_banned == 1 || room.is_banned === true;
 
                     const roomNameEscaped = escapeHtml(room.name);
-                    
+
                     // Show banned badge prominently with consistent size
                     const bannedBadge = isBanned ? `<span class="sidebar-room-badge" style="background: var(--error); color: white; font-weight: 700; height: 26px; padding: 0.35rem 0.65rem; font-size: 0.75rem;"><i data-lucide="ban" style="width: 12px; height: 12px;"></i>BANNED</span>` : '';
                     const creatorBadge = isCreator && !isBanned ? `<span class="sidebar-room-badge sidebar-room-badge--creator"><i data-lucide="crown" style="width: 12px; height: 12px;"></i>Creator</span>` : '';
@@ -2159,14 +2243,14 @@ if (isset($_GET['error'])) {
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    console.log('📄 Rooms loaded:', response);
+                    console.log('Rooms loaded:', response);
                     if (Array.isArray(response)) {
                         allRooms = response;
                         loadJoinedRooms();
                         updateRoomsList(response);
                     } else {
                         console.error('Invalid rooms response:', response);
-                        showToast('Failed to load rooms: Invalid response', 'error');
+                        showToast('Failed to load rooms. Invalid response', 'error');
                     }
                 },
                 error: function(xhr, status, error) {
@@ -2178,7 +2262,7 @@ if (isset($_GET['error'])) {
 
         // Join/Leave Room Functions with Enhanced Persistence
         function joinRoom(roomId, roomName) {
-            console.log('📄 Joining room:', roomId, roomName);
+            console.log('Joining room:', roomId, roomName);
 
             joinedRooms.add(roomId.toString());
             saveJoinedRooms();
@@ -2271,10 +2355,10 @@ if (isset($_GET['error'])) {
                     } else {
                         const errorMsg = response?.error || 'Failed to create room';
                         console.error('Room creation failed:', errorMsg);
-                        
+
                         // Check for specific ban error
                         if (errorMsg.includes('banned') || errorMsg.includes('Banned')) {
-                            showToast('⛔ You are banned and cannot create rooms', 'error');
+                            showToast('You are banned and cannot create rooms', 'error');
                             // Close the modal
                             document.getElementById('createRoomModal').classList.remove('show');
                         } else {
@@ -2370,24 +2454,25 @@ if (isset($_GET['error'])) {
         function selectRoom(roomId, roomName) {
             console.log('Selecting room:', roomId, roomName);
 
-            if (window.innerWidth <= 768) {
-                closeMobileSidebar();
-            }
-
             const room = allRooms.find(r => r.id == roomId);
             const isCreator = room && room.created_by == window.currentUserId;
             const isJoined = joinedRooms.has(roomId.toString());
             const isBanned = room && (room.is_banned == 1 || room.is_banned === true);
 
-            // Allow viewing banned rooms but show warning
+            // COMPLETELY BLOCK ACCESS TO BANNED ROOMS - NO ONE CAN ACCESS
             if (isBanned) {
-                console.log('Room is banned, viewing in read-only mode');
+                showToast('This room is banned. No one can access it anymore.', 'error');
+                return; // Stop here - don't allow entering the room
             }
 
-            // Allow viewing if creator, joined, or banned (read-only)
-            if (!isCreator && !isJoined && !isBanned) {
+            // Check if user has access
+            if (!isCreator && !isJoined) {
                 showToast('Please join this room first', 'warning');
                 return;
+            }
+
+            if (window.innerWidth <= 768) {
+                closeMobileSidebar();
             }
 
             currentRoomId = roomId;
@@ -2406,60 +2491,33 @@ if (isset($_GET['error'])) {
             document.getElementById('chat-interface').style.display = 'flex';
             const chatRoomNameEl = document.getElementById('chat-room-name');
             if (chatRoomNameEl) {
-                chatRoomNameEl.innerHTML = isBanned ? 
-                    `<span style="text-decoration: line-through; opacity: 0.7;">${roomName}</span> <span style="color: var(--error); font-weight: 700;">[BANNED]</span>` : 
-                    roomName;
+                chatRoomNameEl.textContent = roomName;
             }
 
-            // Disable/enable chat input based on ban status
+            // Enable chat input normally (since banned rooms can't be accessed at all now)
             const messageInput = document.getElementById('chat-message-input');
             const sendBtn = document.querySelector('.chat-send-button');
             const fileBtn = document.getElementById('file-btn');
             const inputWrapper = document.querySelector('.chat-input-wrapper');
-            
-            if (isBanned) {
-                if (messageInput) {
-                    messageInput.disabled = true;
-                    messageInput.placeholder = 'This room has been banned. No new messages allowed.';
-                    messageInput.style.opacity = '0.5';
-                }
-                if (sendBtn) {
-                    sendBtn.disabled = true;
-                    sendBtn.style.opacity = '0.5';
-                    sendBtn.style.cursor = 'not-allowed';
-                }
-                if (fileBtn) {
-                    fileBtn.disabled = true;
-                    fileBtn.style.opacity = '0.5';
-                    fileBtn.style.cursor = 'not-allowed';
-                }
-                if (inputWrapper) {
-                    inputWrapper.style.background = 'var(--gray-100)';
-                    inputWrapper.style.borderColor = 'var(--error)';
-                }
-                
-                // Show warning message
-                showToast('⚠️ This room is banned. You can view messages but cannot send new ones.', 'warning');
-            } else {
-                if (messageInput) {
-                    messageInput.disabled = false;
-                    messageInput.placeholder = 'Type your message...';
-                    messageInput.style.opacity = '1';
-                }
-                if (sendBtn) {
-                    sendBtn.disabled = false;
-                    sendBtn.style.opacity = '1';
-                    sendBtn.style.cursor = 'pointer';
-                }
-                if (fileBtn) {
-                    fileBtn.disabled = false;
-                    fileBtn.style.opacity = '1';
-                    fileBtn.style.cursor = 'pointer';
-                }
-                if (inputWrapper) {
-                    inputWrapper.style.background = '';
-                    inputWrapper.style.borderColor = '';
-                }
+
+            if (messageInput) {
+                messageInput.disabled = false;
+                messageInput.placeholder = 'Type your message...';
+                messageInput.style.opacity = '1';
+            }
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.style.opacity = '1';
+                sendBtn.style.cursor = 'pointer';
+            }
+            if (fileBtn) {
+                fileBtn.disabled = false;
+                fileBtn.style.opacity = '1';
+                fileBtn.style.cursor = 'pointer';
+            }
+            if (inputWrapper) {
+                inputWrapper.style.background = '';
+                inputWrapper.style.borderColor = '';
             }
 
             if (window.innerWidth <= 768) {
@@ -2522,229 +2580,229 @@ if (isset($_GET['error'])) {
             if (mobileFooter) mobileFooter.setAttribute('aria-hidden', 'true');
         }
 
-        // Room Users Implementation
-        function showRoomUsers() {
-            if (!currentRoomId) {
-                showToast('Please select a room first', 'warning');
-                return;
-            }
+        // // Room Users Implementation
+        // function showRoomUsers() {
+        //     if (!currentRoomId) {
+        //         showToast('Please select a room first', 'warning');
+        //         return;
+        //     }
 
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay show';
-            modal.id = 'roomUsersModal';
-            modal.innerHTML = `
-                <div class="modal">
-                    <div class="modal-header">
-                        <h3 class="modal-title">
-                            <i data-lucide="users" style="width: 20px; height: 20px; margin-right: 0.5rem;"></i>
-                            Room Members
-                        </h3>
-                        <button class="modal-close" onclick="closeRoomUsersModal()">
-                            <i data-lucide="x" style="width: 20px; height: 20px;"></i>
-                        </button>
-                    </div>
-                    <div style="max-height: 60vh; overflow-y: auto;">
-                        <div id="users-loading" style="text-align: center; padding: 2rem;">
-                            <i data-lucide="loader-2" style="width: 24px; height: 24px; animation: spin 1s linear infinite; margin-bottom: 0.5rem;"></i>
-                            <p>Loading members...</p>
-                        </div>
-                        <div id="users-list"></div>
-                    </div>
-                </div>
-            `;
+        //     const modal = document.createElement('div');
+        //     modal.className = 'modal-overlay show';
+        //     modal.id = 'roomUsersModal';
+        //     modal.innerHTML = `
+        //         <div class="modal">
+        //             <div class="modal-header">
+        //                 <h3 class="modal-title">
+        //                     <i data-lucide="users" style="width: 20px; height: 20px; margin-right: 0.5rem;"></i>
+        //                     Room Members
+        //                 </h3>
+        //                 <button class="modal-close" onclick="closeRoomUsersModal()">
+        //                     <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+        //                 </button>
+        //             </div>
+        //             <div style="max-height: 60vh; overflow-y: auto;">
+        //                 <div id="users-loading" style="text-align: center; padding: 2rem;">
+        //                     <i data-lucide="loader-2" style="width: 24px; height: 24px; animation: spin 1s linear infinite; margin-bottom: 0.5rem;"></i>
+        //                     <p>Loading members...</p>
+        //                 </div>
+        //                 <div id="users-list"></div>
+        //             </div>
+        //         </div>
+        //     `;
 
-            document.body.appendChild(modal);
-            loadRoomMembers();
+        //     document.body.appendChild(modal);
+        //     loadRoomMembers();
 
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
+        //     if (typeof lucide !== 'undefined') {
+        //         lucide.createIcons();
+        //     }
+        // }
 
-        function loadRoomMembers() {
-            // Get the list of users who have joined this room
-            const roomId = currentRoomId;
-            
-            // First, get the room info to find the creator
-            $.get('handlers/room_handler.php', {
-                action: 'get_room_info',
-                room_id: roomId
-            })
-            .done(function(roomInfo) {
-                const users = new Map();
-                
-                // Add room creator first
-                if (roomInfo && !roomInfo.error) {
-                    users.set(roomInfo.created_by.toString(), {
-                        id: roomInfo.created_by,
-                        username: roomInfo.creator_name,
-                        isCreator: true,
-                        isOwn: roomInfo.created_by == window.currentUserId,
-                        messageCount: 0,
-                        lastActive: 'Room Creator'
-                    });
-                }
-                
-                // Add current user if they've joined
-                if (joinedRooms.has(roomId.toString()) && window.currentUserId) {
-                    if (!users.has(window.currentUserId.toString())) {
-                        users.set(window.currentUserId.toString(), {
-                            id: window.currentUserId,
-                            username: window.currentUsername,
-                            isCreator: false,
-                            isOwn: true,
-                            messageCount: 0,
-                            lastActive: 'Active now'
-                        });
-                    }
-                }
-                
-                // Now get messages to see who else has participated
-                $.get('handlers/message_handler.php', {
-                    action: 'get',
-                    room_id: roomId,
-                    limit: 1000
-                })
-                .done(function(messages) {
-                    // Add users who have sent messages
-                    messages.forEach(message => {
-                        if (message.user_id && message.username && !users.has(message.user_id.toString())) {
-                            users.set(message.user_id.toString(), {
-                                id: message.user_id,
-                                username: message.username,
-                                isCreator: false,
-                                isOwn: message.user_id == window.currentUserId,
-                                messageCount: 1,
-                                lastActive: message.created_at
-                            });
-                        } else if (users.has(message.user_id.toString())) {
-                            const user = users.get(message.user_id.toString());
-                            user.messageCount++;
-                            if (message.created_at && (!user.lastActive || user.lastActive === 'Room Creator' || user.lastActive === 'Active now')) {
-                                user.lastActive = message.created_at;
-                            }
-                        }
-                    });
-                    
-                    // Convert to array and sort
-                    const usersList = Array.from(users.values()).sort((a, b) => {
-                        if (a.isCreator) return -1;
-                        if (b.isCreator) return 1;
-                        if (a.isOwn) return -1;
-                        if (b.isOwn) return 1;
-                        return b.messageCount - a.messageCount;
-                    });
-                    
-                    const usersContainer = document.getElementById('users-list');
-                    const loadingContainer = document.getElementById('users-loading');
-                    
-                    if (loadingContainer) loadingContainer.style.display = 'none';
-                    
-                    if (usersList.length === 0) {
-                        usersContainer.innerHTML = `
-                            <div style="text-align: center; padding: 2rem; color: var(--gray-500);">
-                                <i data-lucide="users" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-                                <p>No members found in this room</p>
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    // Count how many have actually joined (in our joinedRooms set)
-                    const joinedCount = usersList.filter(u => u.isCreator || u.isOwn || joinedRooms.has(roomId.toString())).length;
-                    
-                    usersContainer.innerHTML = `
-                        <div style="padding: 1rem; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); margin-bottom: 1rem;">
-                            <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0;">
-                                <i data-lucide="users" style="width: 16px; height: 16px; margin-right: 0.5rem;"></i>
-                                <strong>${usersList.length}</strong> total member${usersList.length !== 1 ? 's' : ''} 
-                                (${joinedCount} joined this room)
-                            </p>
-                        </div>
-                        ${usersList.map(user => `
-                            <div class="user-list-item">
-                                <div class="user-info">
-                                    <div class="user-avatar" style="background: ${user.isCreator ? 'var(--warning)' : user.isOwn ? 'var(--accent)' : 'var(--gray-300)'}; color: ${user.isCreator || user.isOwn ? 'white' : 'var(--gray-700)'}">
-                                        ${user.username.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div class="user-details">
-                                        <div class="user-name">
-                                            ${escapeHtml(user.username)}
-                                            ${user.isOwn ? ' <span style="color: var(--gray-500); font-weight: 400;">(You)</span>' : ''}
-                                            ${user.isCreator ? ' <span style="color: var(--warning); font-weight: 600;">👑 Creator</span>' : ''}
-                                        </div>
-                                        <div class="user-role">
-                                            ${user.messageCount > 0 ? `
-                                                <i data-lucide="message-circle" style="width: 12px; height: 12px; margin-right: 0.25rem;"></i>
-                                                ${user.messageCount} message${user.messageCount !== 1 ? 's' : ''}
-                                            ` : '<span style="color: var(--gray-400);">No messages yet</span>'}
-                                            ${user.lastActive ? ` • ${user.lastActive}` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                                ${!user.isOwn ? `
-                                <div style="display: flex; gap: 0.5rem;">
-                                    <button class="header-btn" onclick="reportUser(${user.id}, '${escapeHtml(user.username).replace(/'/g, '\\\'')}')" style="padding: 0.5rem;">
-                                        <i data-lucide="flag" style="width: 14px; height: 14px;"></i>
-                                    </button>
-                                </div>
-                                ` : ''}
-                            </div>
-                        `).join('')}
-                    `;
-                    
-                    if (typeof lucide !== 'undefined') {
-                        lucide.createIcons();
-                    }
-                })
-                .fail(function() {
-                    document.getElementById('users-loading').innerHTML = `
-                        <div style="text-align: center; padding: 2rem; color: var(--error);">
-                            <i data-lucide="alert-triangle" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-                            <p>Failed to load members</p>
-                        </div>
-                    `;
-                    
-                    if (typeof lucide !== 'undefined') {
-                        lucide.createIcons();
-                    }
-                });
-            })
-            .fail(function() {
-                document.getElementById('users-loading').innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--error);">
-                        <i data-lucide="alert-triangle" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-                        <p>Failed to load room information</p>
-                    </div>
-                `;
-                
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
-            });
-        }
+        // function loadRoomMembers() {
+        //     // Get the list of users who have joined this room
+        //     const roomId = currentRoomId;
 
-        function closeRoomUsersModal() {
-            const modal = document.getElementById('roomUsersModal');
-            if (modal) {
-                modal.classList.remove('show');
-                setTimeout(() => {
-                    if (document.body.contains(modal)) {
-                        document.body.removeChild(modal);
-                    }
-                }, 300);
-            }
-        }
+        //     // First, get the room info to find the creator
+        //     $.get('handlers/room_handler.php', {
+        //             action: 'get_room_info',
+        //             room_id: roomId
+        //         })
+        //         .done(function(roomInfo) {
+        //             const users = new Map();
 
-        function reportCurrentRoom() {
-            if (!currentRoomId) {
-                showToast('Please select a room first', 'warning');
-                return;
-            }
+        //             // Add room creator first
+        //             if (roomInfo && !roomInfo.error) {
+        //                 users.set(roomInfo.created_by.toString(), {
+        //                     id: roomInfo.created_by,
+        //                     username: roomInfo.creator_name,
+        //                     isCreator: true,
+        //                     isOwn: roomInfo.created_by == window.currentUserId,
+        //                     messageCount: 0,
+        //                     lastActive: 'Room Creator'
+        //                 });
+        //             }
 
-            const roomName = document.getElementById('chat-room-name').textContent;
-            reportRoom(currentRoomId, roomName);
-        }
+        //             // Add current user if they've joined
+        //             if (joinedRooms.has(roomId.toString()) && window.currentUserId) {
+        //                 if (!users.has(window.currentUserId.toString())) {
+        //                     users.set(window.currentUserId.toString(), {
+        //                         id: window.currentUserId,
+        //                         username: window.currentUsername,
+        //                         isCreator: false,
+        //                         isOwn: true,
+        //                         messageCount: 0,
+        //                         lastActive: 'Active now'
+        //                     });
+        //                 }
+        //             }
+
+        //             // Now get messages to see who else has participated
+        //             $.get('handlers/message_handler.php', {
+        //                     action: 'get',
+        //                     room_id: roomId,
+        //                     limit: 1000
+        //                 })
+        //                 .done(function(messages) {
+        //                     // Add users who have sent messages
+        //                     messages.forEach(message => {
+        //                         if (message.user_id && message.username && !users.has(message.user_id.toString())) {
+        //                             users.set(message.user_id.toString(), {
+        //                                 id: message.user_id,
+        //                                 username: message.username,
+        //                                 isCreator: false,
+        //                                 isOwn: message.user_id == window.currentUserId,
+        //                                 messageCount: 1,
+        //                                 lastActive: message.created_at
+        //                             });
+        //                         } else if (users.has(message.user_id.toString())) {
+        //                             const user = users.get(message.user_id.toString());
+        //                             user.messageCount++;
+        //                             if (message.created_at && (!user.lastActive || user.lastActive === 'Room Creator' || user.lastActive === 'Active now')) {
+        //                                 user.lastActive = message.created_at;
+        //                             }
+        //                         }
+        //                     });
+
+        //                     // Convert to array and sort
+        //                     const usersList = Array.from(users.values()).sort((a, b) => {
+        //                         if (a.isCreator) return -1;
+        //                         if (b.isCreator) return 1;
+        //                         if (a.isOwn) return -1;
+        //                         if (b.isOwn) return 1;
+        //                         return b.messageCount - a.messageCount;
+        //                     });
+
+        //                     const usersContainer = document.getElementById('users-list');
+        //                     const loadingContainer = document.getElementById('users-loading');
+
+        //                     if (loadingContainer) loadingContainer.style.display = 'none';
+
+        //                     if (usersList.length === 0) {
+        //                         usersContainer.innerHTML = `
+        //                     <div style="text-align: center; padding: 2rem; color: var(--gray-500);">
+        //                         <i data-lucide="users" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+        //                         <p>No members found in this room</p>
+        //                     </div>
+        //                 `;
+        //                         return;
+        //                     }
+
+        //                     // Count how many have actually joined (in our joinedRooms set)
+        //                     const joinedCount = usersList.filter(u => u.isCreator || u.isOwn || joinedRooms.has(roomId.toString())).length;
+
+        //                     usersContainer.innerHTML = `
+        //                 <div style="padding: 1rem; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); margin-bottom: 1rem;">
+        //                     <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0;">
+        //                         <i data-lucide="users" style="width: 16px; height: 16px; margin-right: 0.5rem;"></i>
+        //                         <strong>${usersList.length}</strong> total member${usersList.length !== 1 ? 's' : ''} 
+        //                         (${joinedCount} joined this room)
+        //                     </p>
+        //                 </div>
+        //                 ${usersList.map(user => `
+        //                     <div class="user-list-item">
+        //                         <div class="user-info">
+        //                             <div class="user-avatar" style="background: ${user.isCreator ? 'var(--warning)' : user.isOwn ? 'var(--accent)' : 'var(--gray-300)'}; color: ${user.isCreator || user.isOwn ? 'white' : 'var(--gray-700)'}">
+        //                                 ${user.username.charAt(0).toUpperCase()}
+        //                             </div>
+        //                             <div class="user-details">
+        //                                 <div class="user-name">
+        //                                     ${escapeHtml(user.username)}
+        //                                     ${user.isOwn ? ' <span style="color: var(--gray-500); font-weight: 400;">(You)</span>' : ''}
+        //                                     ${user.isCreator ? ' <span style="color: var(--warning); font-weight: 600;"><i data-lucide="crown" style="width: 14px; height: 14px; margin-right: 0.25rem;"></i>Creator</span>' : ''}
+        //                                 </div>
+        //                                 <div class="user-role">
+        //                                     ${user.messageCount > 0 ? `
+        //                                         <i data-lucide="message-circle" style="width: 12px; height: 12px; margin-right: 0.25rem;"></i>
+        //                                         ${user.messageCount} message${user.messageCount !== 1 ? 's' : ''}
+        //                                     ` : '<span style="color: var(--gray-400);">No messages yet</span>'}
+        //                                     ${user.lastActive ? ` <span style="color: var(--gray-400);">•</span> ${user.lastActive}` : ''}
+        //                                 </div>
+        //                             </div>
+        //                         </div>
+        //                         ${!user.isOwn ? `
+        //                         <div style="display: flex; gap: 0.5rem;">
+        //                             <button class="header-btn" onclick="reportUser(${user.id}, '${escapeHtml(user.username).replace(/'/g, '\\\'')}')" style="padding: 0.5rem;">
+        //                                 <i data-lucide="flag" style="width: 14px; height: 14px;"></i>
+        //                             </button>
+        //                         </div>
+        //                         ` : ''}
+        //                     </div>
+        //                 `).join('')}
+        //             `;
+
+        //                     if (typeof lucide !== 'undefined') {
+        //                         lucide.createIcons();
+        //                     }
+        //                 })
+        //                 .fail(function() {
+        //                     document.getElementById('users-loading').innerHTML = `
+        //                 <div style="text-align: center; padding: 2rem; color: var(--error);">
+        //                     <i data-lucide="alert-triangle" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+        //                     <p>Failed to load members</p>
+        //                 </div>
+        //             `;
+
+        //                     if (typeof lucide !== 'undefined') {
+        //                         lucide.createIcons();
+        //                     }
+        //                 });
+        //         })
+        //         .fail(function() {
+        //             document.getElementById('users-loading').innerHTML = `
+        //             <div style="text-align: center; padding: 2rem; color: var(--error);">
+        //                 <i data-lucide="alert-triangle" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+        //                 <p>Failed to load room information</p>
+        //             </div>
+        //         `;
+
+        //             if (typeof lucide !== 'undefined') {
+        //                 lucide.createIcons();
+        //             }
+        //         });
+        // }
+
+        // function closeRoomUsersModal() {
+        //     const modal = document.getElementById('roomUsersModal');
+        //     if (modal) {
+        //         modal.classList.remove('show');
+        //         setTimeout(() => {
+        //             if (document.body.contains(modal)) {
+        //                 document.body.removeChild(modal);
+        //             }
+        //         }, 300);
+        //     }
+        // }
+
+        // function reportCurrentRoom() {
+        //     if (!currentRoomId) {
+        //         showToast('Please select a room first', 'warning');
+        //         return;
+        //     }
+
+        //     const roomName = document.getElementById('chat-room-name').textContent;
+        //     reportRoom(currentRoomId, roomName);
+        // }
 
         // JS MODULE: chat
         // File Upload Functions
@@ -2938,13 +2996,13 @@ if (isset($_GET['error'])) {
             const input = document.getElementById('chat-message-input');
             const sendBtn = document.querySelector('.chat-send-button');
             const message = input ? input.value.trim() : '';
-            
-            // Check if room is banned
+
+            // Check if room is banned (double-check before sending)
             if (currentRoomInfo && (currentRoomInfo.is_banned == 1 || currentRoomInfo.is_banned === true)) {
                 showToast('Cannot send messages in a banned room', 'error');
                 return;
             }
-            
+
             if ((!message && !selectedFile) || !currentRoomId || isSending) return;
 
             isSending = true;
@@ -2957,18 +3015,24 @@ if (isset($_GET['error'])) {
 
             const tempId = 'temp-' + Date.now() + '-' + Math.floor(Math.random() * 100000);
             const container = document.getElementById('chat-messages');
+
+            // Remove "no messages" placeholder if it exists
+            const placeholder = container.querySelector('div[style*="text-align: center"]');
+            if (placeholder) {
+                placeholder.remove();
+            }
+
             try {
                 const isOwn = true;
-                const sizeClass = (message && message.length <= 20) ? 'message--short' : (message && message.length <= 60) ? 'message--medium' : '';
                 const optimisticHTML = `
-                    <div class="message message--own ${sizeClass} message-optimistic" data-temp-id="${tempId}" data-user-id="${window.currentUserId || ''}" tabindex="0">
+                    <div class="message message--own message-optimistic" data-temp-id="${tempId}" data-user-id="${window.currentUserId || ''}" tabindex="0">
                         <div class="message-content">
                             ${escapeHtml(message || (selectedFile ? '[Attachment]' : ''))}
                         </div>
                         <div class="message-meta">
                             <div class="message-info">
                                 <span class="message-author">${escapeHtml(window.currentUsername || '')}</span>
-                                <span class="message-time">Sending…</span>
+                                <span class="message-time">Sending...</span>
                             </div>
                             <div style="padding-left:0.5rem; color:var(--gray-400); font-size:0.8rem;">Sending</div>
                         </div>
@@ -3003,7 +3067,7 @@ if (isset($_GET['error'])) {
             formData.append('room_id', currentRoomId);
             if (message) formData.append('message', message);
             if (selectedFile) formData.append('attachment', selectedFile);
-            
+
             $.ajax({
                 url: 'handlers/message_handler.php',
                 type: 'POST',
@@ -3209,6 +3273,12 @@ if (isset($_GET['error'])) {
             pollingInterval = setInterval(() => {
                 if (pollPaused) return;
                 if (currentRoomId === roomId) {
+                    // Check if room is banned (stop polling if banned)
+                    if (currentRoomInfo && (currentRoomInfo.is_banned == 1 || currentRoomInfo.is_banned === true)) {
+                        clearInterval(pollingInterval);
+                        return;
+                    }
+
                     $.get('handlers/message_handler.php', {
                             action: 'poll',
                             room_id: roomId,
@@ -3233,6 +3303,12 @@ if (isset($_GET['error'])) {
         function appendNewMessages(messages) {
             const container = document.getElementById('chat-messages');
             if (container) {
+                // Remove "no messages" placeholder if it exists
+                const placeholder = container.querySelector('div[style*="text-align: center"]');
+                if (placeholder) {
+                    placeholder.remove();
+                }
+
                 let appended = false;
                 messages.forEach(message => {
                     if (message && message.id !== undefined && displayedMessageIds.has(message.id)) return;
@@ -3810,6 +3886,8 @@ if (isset($_GET['error'])) {
                     if (response.success) {
                         showToast(response.message || 'Report processed successfully', 'success');
                         showAdminReports();
+                        // Refresh rooms to show ban status
+                        loadRooms();
                     } else {
                         showToast(response.error || 'Failed to process report', 'error');
                     }
@@ -3829,45 +3907,58 @@ if (isset($_GET['error'])) {
 
         function banUser(userId, username) {
             if (!confirm(`Are you sure you want to permanently ban user "${username}"?\n\nThis will:\n• Ban the user permanently (cannot login again)\n• Ban all rooms they created\n• Delete all their messages\n\nThis action cannot be undone.`)) return;
-            
+
             $.post('handlers/admin_handler.php', {
-                action: 'ban_user',
-                user_id: userId
-            })
-            .done(function(response) {
-                if (response.success) {
-                    showToast(response.message || `User "${username}" has been permanently banned`, 'success');
-                    // Refresh the admin panel
-                    showAdminUsers();
-                } else {
-                    showToast(response.error || 'Failed to ban user', 'error');
-                }
-            })
-            .fail(function() {
-                showToast('Failed to ban user', 'error');
-            });
+                    action: 'ban_user',
+                    user_id: userId
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        showToast(response.message || `User "${username}" has been permanently banned`, 'success');
+                        // Refresh the admin panel
+                        showAdminUsers();
+                        // Refresh rooms to show ban status
+                        loadRooms();
+                    } else {
+                        showToast(response.error || 'Failed to ban user', 'error');
+                    }
+                })
+                .fail(function() {
+                    showToast('Failed to ban user', 'error');
+                });
         }
 
         function banRoom(roomId, roomName) {
             if (!confirm(`Are you sure you want to permanently ban room "${roomName}"?\n\nThis will prevent anyone from sending messages in this room.\n\nThis action cannot be undone.`)) return;
-            
+
             $.post('handlers/admin_handler.php', {
-                action: 'ban_room',
-                room_id: roomId
-            })
-            .done(function(response) {
-                if (response.success) {
-                    showToast(response.message || `Room "${roomName}" has been permanently banned`, 'success');
-                    // Refresh the admin panel and rooms list
-                    showAdminRooms();
-                    loadRooms();
-                } else {
-                    showToast(response.error || 'Failed to ban room', 'error');
-                }
-            })
-            .fail(function() {
-                showToast('Failed to ban room', 'error');
-            });
+                    action: 'ban_room',
+                    room_id: roomId
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        showToast(response.message || `Room "${roomName}" has been permanently banned`, 'success');
+                        // Refresh the admin panel and rooms list
+                        showAdminRooms();
+                        loadRooms();
+
+                        // If we're currently in the banned room, exit it
+                        if (currentRoomId == roomId) {
+                            document.getElementById('chat-interface').style.display = 'none';
+                            document.getElementById('welcome-screen').style.display = 'flex';
+                            currentRoomId = null;
+                            if (pollingInterval) {
+                                clearInterval(pollingInterval);
+                                pollingInterval = null;
+                            }
+                        }
+                    } else {
+                        showToast(response.error || 'Failed to ban room', 'error');
+                    }
+                })
+                .fail(function() {
+                    showToast('Failed to ban room', 'error');
+                });
         }
 
         function closeAdminModal() {
@@ -3884,14 +3975,14 @@ if (isset($_GET['error'])) {
 
         // INITIALIZATION WITH COMPLETE FUNCTIONALITY
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initializing complete chat application...');
+            console.log('Initializing complete chat application...');
 
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
 
             if (!window.isLoggedIn) {
-                console.log('👤 User not logged in, handling auth forms');
+                console.log('User not logged in, handling auth forms');
 
                 const signinTab = document.getElementById('signin-tab-btn');
                 const registerTab = document.getElementById('register-tab-btn');
@@ -4020,19 +4111,6 @@ if (isset($_GET['error'])) {
                     showAdminPanel();
                 });
             }
-
-            // Chat header buttons
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.chat-header-btn') && e.target.closest('.chat-header-btn').querySelector('[data-lucide="users"]')) {
-                    e.preventDefault();
-                    showRoomUsers();
-                }
-
-                if (e.target.closest('.chat-header-btn') && e.target.closest('.chat-header-btn').querySelector('[data-lucide="flag"]')) {
-                    e.preventDefault();
-                    reportCurrentRoom();
-                }
-            });
 
             // Room selection
             document.addEventListener('click', function(e) {
@@ -4163,7 +4241,7 @@ if (isset($_GET['error'])) {
                 });
             })();
 
-            // Start polling intervals
+            // Start polling intervals - refresh rooms every 5 seconds
             setInterval(loadRooms, 5000);
 
             console.log('Complete chat application initialized');
