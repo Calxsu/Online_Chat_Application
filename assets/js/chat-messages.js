@@ -1,24 +1,78 @@
 // Message Functions
+
+// Function to reset message state when switching rooms
+function resetMessageState() {
+    console.log('Resetting message state for room switch');
+    
+    // Clear any existing polling interval
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
+    
+    // Reset all message-related state variables
+    lastMessageId = 0;
+    displayedMessageIds.clear();
+    pollPaused = false;
+    isSending = false;
+    
+    // Clear the messages container
+    const container = document.getElementById('chat-messages');
+    if (container) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 3rem 1rem; color: var(--gray-500);">
+                <i data-lucide="loader-2" style="width: 24px; height: 24px; animation: spin 1s linear infinite;"></i>
+                <p>Loading messages...</p>
+            </div>
+        `;
+    }
+}
+
 function loadMessages(roomId) {
+    console.log('Loading messages for room:', roomId);
+    
+    // Ensure we're not in a paused state
+    pollPaused = false;
+    
     $.get('handlers/message_handler.php', {
             action: 'get',
             room_id: roomId,
             limit: 50
         })
         .done(function(messages) {
+            console.log('Messages loaded successfully:', messages.length, 'messages');
             displayMessages(messages);
             if (messages.length > 0) {
                 lastMessageId = Math.max(...messages.map(m => m.id));
+                console.log('Set lastMessageId to:', lastMessageId);
             }
         })
-        .fail(function() {
+        .fail(function(xhr, status, error) {
+            console.error('Failed to load messages:', { status, error });
             showToast('Failed to load messages', 'error');
+            
+            // Show error in chat container
+            const container = document.getElementById('chat-messages');
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem 1rem; color: var(--error);">
+                        <i data-lucide="alert-triangle" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                        <p>Failed to load messages. Please try refreshing.</p>
+                    </div>
+                `;
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
         });
 }
 
 function displayMessages(messages) {
     const container = document.getElementById('chat-messages');
-    if (!container) return;
+    if (!container) {
+        console.error('Chat messages container not found');
+        return;
+    }
 
     // Filter out system messages or check for real content
     const realMessages = messages.filter(m => !m.is_system);
@@ -31,12 +85,18 @@ function displayMessages(messages) {
             </div>
         `;
     } else {
+        // Clear the displayed message IDs set before repopulating
+        displayedMessageIds.clear();
+        
         // Reverse messages for correct chronological order (oldest first)
         const reversedMessages = [...messages].reverse();
         container.innerHTML = reversedMessages.map(message => createMessageHTML(message)).join('');
-        displayedMessageIds.clear();
+        
+        // Track displayed message IDs
         messages.forEach(m => {
-            if (m && m.id !== undefined && m.id !== null) displayedMessageIds.add(m.id);
+            if (m && m.id !== undefined && m.id !== null) {
+                displayedMessageIds.add(m.id);
+            }
         });
 
         if (messages.length > 0) {
@@ -181,10 +241,8 @@ function sendMessage() {
             console.warn('Could not tag optimistic element', e);
         }
 
-        if (pollingInterval) {
-            clearInterval(pollingInterval);
-            pollPaused = true;
-        }
+        // Pause polling during message send
+        pollPaused = true;
     } catch (e) {
         console.warn('Failed to render optimistic message', e);
     }
@@ -267,13 +325,10 @@ function sendMessage() {
                 sendBtn.disabled = false;
             }
 
+            // Resume polling after a short delay
             setTimeout(function() {
-                if (pollPaused) {
-                    pollPaused = false;
-                    if (currentRoomId) {
-                        startMessagePolling(currentRoomId);
-                    }
-                }
+                pollPaused = false;
+                console.log('Resumed polling after message send');
             }, 700);
 
             if (typeof lucide !== 'undefined') {
@@ -393,39 +448,59 @@ function markMessageDeleted(messageId, username = null, deletedAt = null) {
 }
 
 function startMessagePolling(roomId) {
+    console.log('Starting message polling for room:', roomId);
+    
+    // Clear any existing polling interval first
     if (pollingInterval) {
         clearInterval(pollingInterval);
+        pollingInterval = null;
     }
+    
+    // Ensure polling is not paused
+    pollPaused = false;
 
     pollingInterval = setInterval(() => {
-        if (pollPaused) return;
-        if (currentRoomId === roomId) {
-            // Check if room is banned (stop polling if banned)
-            if (currentRoomInfo && (currentRoomInfo.is_banned == 1 || currentRoomInfo.is_banned === true)) {
-                clearInterval(pollingInterval);
-                pollPaused = true;
-                return;
-            }
-
-            $.get('handlers/message_handler.php', {
-                    action: 'poll',
-                    room_id: roomId,
-                    last_id: lastMessageId
-                })
-                .done(function(newMessages) {
-                    if (newMessages && newMessages.length > 0) {
-                        appendNewMessages(newMessages);
-                        const numericIds = newMessages.map(m => m.id).filter(i => i !== undefined && i !== null && !isNaN(i));
-                        if (numericIds.length) {
-                            lastMessageId = Math.max(lastMessageId, ...numericIds);
-                        }
-                    }
-                })
-                .fail(function(xhr, status, error) {
-                    // Log polling errors for debugging (remove or comment out in production)
-                    console.error('Polling error:', { status, error, responseText: xhr && xhr.responseText });
-                });
+        // Skip if polling is paused or room has changed
+        if (pollPaused || currentRoomId != roomId) {
+            console.log('Skipping poll - paused:', pollPaused, 'room mismatch:', currentRoomId != roomId);
+            return;
         }
+        
+        // Check if room is banned (stop polling if banned)
+        if (currentRoomInfo && (currentRoomInfo.is_banned == 1 || currentRoomInfo.is_banned === true)) {
+            console.log('Room is banned, stopping polling');
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+            return;
+        }
+
+        $.get('handlers/message_handler.php', {
+                action: 'poll',
+                room_id: roomId,
+                last_id: lastMessageId
+            })
+            .done(function(newMessages) {
+                // Double-check we're still in the same room using == for type coercion
+                if (currentRoomId != roomId) {
+                    console.log('Room changed during poll, ignoring results');
+                    return;
+                }
+                
+                if (newMessages && newMessages.length > 0) {
+                    console.log('New messages received:', newMessages.length);
+                    appendNewMessages(newMessages);
+                    const numericIds = newMessages.map(m => m.id).filter(i => i !== undefined && i !== null && !isNaN(i));
+                    if (numericIds.length) {
+                        lastMessageId = Math.max(lastMessageId, ...numericIds);
+                    }
+                }
+            })
+            .fail(function(xhr, status, error) {
+                // Only log critical errors, not routine polling failures
+                if (status !== 'abort' && xhr.status !== 0) {
+                    console.error('Polling error:', { status, error, roomId });
+                }
+            });
     }, 3000);
 }
 
@@ -462,3 +537,36 @@ function appendNewMessages(messages) {
         }
     }
 }
+
+function scrollToBottom() {
+    const container = document.getElementById('chat-messages');
+    if (container) {
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
+function showImageModal(src, filename) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay show';
+    modal.innerHTML = `
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">${escapeHtml(filename)}</h3>
+                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+                    <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+                </button>
+            </div>
+            <div style="text-align: center; padding: 1rem;">
+                <img src="${src}" alt="${escapeHtml(filename)}" style="max-width: 100%; max-height: 60vh; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+// Export the reset function so it can be called from other modules
+window.resetMessageState = resetMessageState;
