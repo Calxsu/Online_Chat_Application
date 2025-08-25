@@ -282,8 +282,30 @@ if (isset($_GET['error'])) {
             </div>
         </div>
     <?php endif; ?>
-
+    <!-- This script block must remain in index.php as it contains PHP variables -->
     <script>
+        // Global variables
+        window.isLoggedIn = <?php echo $isLoggedIn ? 'true' : 'false'; ?>;
+        window.currentUserId = <?php echo json_encode($userId); ?>;
+        window.currentUsername = <?php echo json_encode($username); ?>;
+        window.isAdmin = <?php echo $isAdmin ? 'true' : 'false'; ?>;
+    </script>
+
+    <!-- JavaScript Files -->
+    <script src="assets/js/globals.js"></script>
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/ui.js"></script>
+    <script src="assets/js/room-persistence.js"></script>
+    <script src="assets/js/jquery-bundle.js"></script>
+    <script src="assets/js/chat-messages.js"></script>
+    <script src="assets/js/admin-reports.js"></script>
+    <script src="assets/js/init.js"></script>
+
+
+
+
+    <!-- <script>
         // Global variables
         window.isLoggedIn = <?php echo $isLoggedIn ? 'true' : 'false'; ?>;
         window.currentUserId = <?php echo json_encode($userId); ?>;
@@ -2410,7 +2432,7 @@ if (isset($_GET['error'])) {
         window.openInviteModal = openInviteModal;
         window.closeInviteModal = closeInviteModal;
         window.submitInvite = submitInvite;
-    </script>
+    </script> -->
 
 </body>
 
